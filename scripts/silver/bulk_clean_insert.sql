@@ -1,6 +1,6 @@
-//-----------------------------------
-//Cleans raw data from each table and inserts into silver schema
-//-----------------------------------
+--//-----------------------------------
+--//Cleans raw data from each table and inserts into silver schema
+--//-----------------------------------
 --Inserts the corrected data and removes the bad data from the raw table to a new silver table
 insert into silver.crm_cust_info (cst_id, cst_key, cst_firstname, cst_lastname, cst_marital_status, cst_gndr, cst_create_date)
 select cst_id,
