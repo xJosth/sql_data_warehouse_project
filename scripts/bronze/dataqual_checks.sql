@@ -1,6 +1,6 @@
-//-------------------
-//INSERTING CLEANED DATA INTO SILVER TABLE
-//-------------------
+--//-------------------
+--//INSERTING CLEANED DATA INTO SILVER TABLE
+--//-------------------
 
 --Inserts the corrected data and removes the bad data from the raw table to a new silver table
 insert into silver.crm_cust_info (cst_id, cst_key, cst_firstname, cst_lastname, cst_marital_status, cst_gndr, cst_create_date)
@@ -17,9 +17,9 @@ from (select
 from bronze.crm_cust_info) as rn --ranks the cst_id by recent date; 1 is most recent, used to filter
 where dup = 1 AND cst_id is not null;
 
-//-------------------
-//DUPLICATE AND NULL CHECKS FOR KEY COLUMN
-//-------------------
+--//-------------------
+--//DUPLICATE AND NULL CHECKS FOR KEY COLUMN
+--//-------------------
 
 -- find nulls and duplicate cst_id (customer ids) in the raw table
 select
@@ -66,9 +66,9 @@ where dup = 1 AND cst_id is not null) as chec
 group by cst_id
 having count(*) > 1 or cst_id is null;
 
-//-------------------
-//TEXT ROW VALUE CHECKS; SPACES & RENAMING
-//-------------------
+--//-------------------
+--//TEXT ROW VALUE CHECKS; SPACES & RENAMING
+--//-------------------
 --Checking if there are extra spaces in each column, should return nothing if true
 select
     *
