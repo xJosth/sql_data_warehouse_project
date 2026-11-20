@@ -37,4 +37,16 @@ select
     lead(prd_start_dt) over(partition by prd_key order by prd_start_dt) -1 as prd_end_dt
 from bronze.crm_prd_info;
 
-
+--Inserts the corrected data and removes the bad data from the raw table to a new silver crm_sales_details table
+insert into silver.crm_sales_details(sls_ord_num, sls_prd_key, sls_cust_id, sls_order_dt, sls_ship_dt, sls_due_dt, sls_sales, sls_quantity, sls_price)
+select
+    sls_ord_num,
+    sls_prd_key,
+    sls_cust_id,
+    case when length(sls_order_dt::varchar) != 8 or sls_order_dt = 0 then NULL else sls_order_dt::varchar::date end as sls_order_dt,
+    case when length(sls_ship_dt::varchar) != 8 or sls_ship_dt = 0 then NULL else sls_ship_dt::varchar::date end as sls_ship_dt,
+    case when length(sls_due_dt::varchar) != 8 or sls_due_dt = 0 then NULL else sls_due_dt::varchar::date end as sls_due_dt,
+    case when sls_sales is null or sls_sales <= 0 or sls_sales!= abs(sls_quantity*sls_price) then abs(sls_quantity)*abs(sls_price) else abs(sls_sales) end as sls_sales,
+    case when sls_quantity is null or sls_quantity <= 0 then abs(sls_sales)/nullif(abs(sls_price),0) else abs(sls_quantity)end as sls_quantity,
+    case when sls_price is null or sls_price =0 then abs(sls_sales)/nullif(abs(sls_quantity),0) else round(abs(sls_sales)/nullif(abs(sls_quantity),0)::numeric,2) end as sls_price
+from bronze.crm_sales_details;
