@@ -50,3 +50,19 @@ select
     case when sls_quantity is null or sls_quantity <= 0 then abs(sls_sales)/nullif(abs(sls_price),0) else abs(sls_quantity)end as sls_quantity,
     case when sls_price is null or sls_price =0 then abs(sls_sales)/nullif(abs(sls_quantity),0) else round(abs(sls_sales)/nullif(abs(sls_quantity),0)::numeric,2) end as sls_price
 from bronze.crm_sales_details;
+
+--Inserts the corrected data and removes the bad data from the raw table to a new silver erp_cust table
+insert into silver.erp_cust_az12 (cid, bdate, gen)
+select distinct
+    case when cid ILIKE 'NAS%' then substring(cid,4) else cid end as cid,
+    case when bdate > now() then null else bdate end as bdate,
+    case replace(upper(gen),' ','')
+        when 'M' then 'Male'
+        when 'MALE' then 'Male'
+        when 'F' then 'Female'
+        when 'FEMALE' then 'Female'
+        else 'N/A'
+    end as gen
+from bronze.erp_cust_az12
+
+
