@@ -63,6 +63,17 @@ select distinct
         when 'FEMALE' then 'Female'
         else 'N/A'
     end as gen
-from bronze.erp_cust_az12
+from bronze.erp_cust_az12;
 
+--Inserts the corrected data and removes the bad data from the raw table to a new silver erp_loc table
+insert into silver.erp_loc_a101(cid, cntry)
+select
+    trim(replace(cid,'-','')) as cid,
+    case
+       when upper(trim(cntry)) in ('CANADA','CA') then 'Canada'
+       when upper(trim(cntry)) in ('US', 'USA', 'UNITED STATES') then 'United States'
+       when upper(trim(cntry)) in ('DE', 'GERMANY') then 'Germany'
+    else 'N/A'
+    end as cntry
+from bronze.erp_loc_a101;
 
