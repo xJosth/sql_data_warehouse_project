@@ -70,9 +70,12 @@ insert into silver.erp_loc_a101(cid, cntry)
 select
     trim(replace(cid,'-','')) as cid,
     case
+       when upper(trim(cntry)) in ('AUS', 'AU', 'AUSTRALIA') then 'Australia'
        when upper(trim(cntry)) in ('CANADA','CA') then 'Canada'
        when upper(trim(cntry)) in ('US', 'USA', 'UNITED STATES') then 'United States'
        when upper(trim(cntry)) in ('DE', 'GERMANY') then 'Germany'
+        when upper(trim(cntry)) in ('FR','FRANCE') THEN 'France'
+        when upper(trim(cntry)) in ('UK','UNITED KINGDOM') then 'United Kingdom'
     else 'N/A'
     end as cntry
 from bronze.erp_loc_a101;
