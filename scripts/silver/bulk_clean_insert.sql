@@ -76,7 +76,8 @@ select
        when upper(trim(cntry)) in ('DE', 'GERMANY') then 'Germany'
         when upper(trim(cntry)) in ('FR','FRANCE') THEN 'France'
         when upper(trim(cntry)) in ('UK','UNITED KINGDOM') then 'United Kingdom'
-    else 'N/A'
+        when upper(trim(cntry)) = '' or cntry is null then 'N/A'
+    else trim(cntry)
     end as cntry
 from bronze.erp_loc_a101;
 
