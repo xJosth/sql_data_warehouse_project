@@ -81,3 +81,12 @@ select
     end as cntry
 from bronze.erp_loc_a101;
 
+--Inserts the data from the raw table to a new silver erp_px_cat table
+insert into silver.erp_px_cat_g1v2(id, cat, subcat, maintenance)
+select
+    id,
+    cat,
+    subcat,
+    maintenance
+from bronze.erp_px_cat_g1v2;
+
