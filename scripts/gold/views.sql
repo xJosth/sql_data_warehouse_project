@@ -51,3 +51,23 @@ left join silver.erp_px_cat_g1v2 as p1 on p.cat_id = p1.id
 --//-------------------------------------
 --//Creates the fact views for the customers, products and sales data
 --//-------------------------------------
+
+--//Creates the fact view for the sales data via the silver crm_sales_details , the dim_products and dim_customers
+create or replace view gold.fact_sales as
+(
+select
+    s.sls_ord_num  as order_number,
+    sp.product_key,
+    sc.customer_key,
+    s.sls_order_dt as order_date,
+    s.sls_ship_dt  as shipping_date,
+    s.sls_due_dt   as due_date,
+    s.sls_sales    as sales_amount,
+    s.sls_quantity as quantity,
+    s.sls_price    as price
+from silver.crm_sales_details as s
+left join gold.dim_products as sp on s.sls_prd_key = sp.product_number
+left join gold.dim_customers as sc on s.sls_cust_id = sc.customer_id
+);
+
+
