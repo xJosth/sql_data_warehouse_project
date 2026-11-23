@@ -169,10 +169,11 @@ group by p.category
 order by category_sales desc
 ;
 
---customer sales and segments
+--customer sales and segments by age and spending
 select
     customer_key,
     customer_sales,
+    customer_history::varchar|| ' Days' as customer_age,
     case
         when customer_history >= 365 and customer_sales > 5000 then 'VIP'
         when customer_history >= 365 and customer_sales <= 5000 then 'Regular'
@@ -189,7 +190,7 @@ group by customer_key
 ) t
 ;
 
---total customers per segment
+--total customers per segment by age and spending
 select
     case
         when customer_history >= 365 and customer_sales > 5000 then 'VIP'
