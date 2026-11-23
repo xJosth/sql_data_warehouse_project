@@ -58,3 +58,24 @@ left join gold.fact_sales as s on c.customer_key = s.customer_key
 group by c.customer_number
 order by total_revenue desc
 ;
+
+--top and bottom 10 products by total sales, only displays the top ranks ranking to show the place of the bottom 10
+with cte as (select p.product_name,
+                    count(distinct p.product_number)    as total_products,
+                    avg(p.cost)::money                  as avg_cost,
+                    sum(s.sales_amount)::numeric::money as total_sales,
+                    dense_rank() over (order by sum(s.sales_amount) desc nulls last) as top_ranks,
+                    dense_rank() over (order by sum(s.sales_amount) asc nulls last) as bot_ranks
+             from gold.dim_products as p
+                      left join gold.fact_sales as s on p.product_key = s.product_key
+             group by p.product_name
+             having sum(s.sales_amount) is not null
+             order by total_sales desc nulls last)
+select
+    product_name,
+    total_products,
+    avg_cost,
+    total_sales,
+    top_ranks
+from cte
+where top_ranks <=10 or bot_ranks <=10
