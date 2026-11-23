@@ -169,3 +169,42 @@ group by p.category
 order by category_sales desc
 ;
 
+--customer sales and segments
+select
+    customer_key,
+    customer_sales,
+    case
+        when customer_history >= 365 and customer_sales > 5000 then 'VIP'
+        when customer_history >= 365 and customer_sales <= 5000 then 'Regular'
+        else 'New'
+    end as customer_segment
+from
+(
+select
+    customer_key,
+    max(order_date) - min(order_date)  as customer_history,
+    sum(sales_amount)  as customer_sales
+from gold.fact_sales
+group by customer_key
+) t
+;
+
+--total customers per segment
+select
+    case
+        when customer_history >= 365 and customer_sales > 5000 then 'VIP'
+        when customer_history >= 365 and customer_sales <= 5000 then 'Regular'
+        else 'New'
+    end as customer_segment,
+    count(distinct customer_key) as num_cust
+
+from
+(
+select
+    customer_key,
+    max(order_date) over (partition by customer_key) - min(order_date) over (partition by customer_key) as customer_history,
+    sum(sales_amount) over (partition by customer_key) as customer_sales
+from gold.fact_sales
+) t
+group by customer_segment
+;
