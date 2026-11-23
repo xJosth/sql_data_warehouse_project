@@ -115,3 +115,38 @@ where order_date is not null
 group by date_trunc('month', order_date)
 order by date_trunc('month', order_date)
 ;
+
+--yoy comparison of total sales and running avg sales for each product
+with cte as
+    (
+select
+    date_trunc('year',s.order_date)::date as yearly,
+    p.product_name as product,
+    sum(s.sales_amount) as total_sales,
+    lag(sum(s.sales_amount),1,sum(s.sales_amount))  over(partition by p.product_name order by date_trunc('year',s.order_date)) as prev_year_sales
+from gold.fact_sales as s
+left join gold.dim_products as p on s.product_key = p.product_key
+where order_date is not null
+group by date_trunc('year',order_date), product
+order by yearly, product
+)
+select
+    yearly,
+    product,
+    total_sales,
+    total_sales-prev_year_sales as current_vs_prev_year_sales,
+    case
+        when total_sales-prev_year_sales >0 then 'Increase'
+        when total_sales-prev_year_sales <0 then 'Decrease'
+        else 'No Change'
+    end as yoy_change,
+    round(avg(total_sales) over(partition by product order by yearly),0)  as yearly_runavg_sales,
+    total_sales - round(avg(total_sales) over(partition by product order by yearly),0) as current_vs_avg_sales,
+    case
+        when total_sales - round(avg(total_sales) over(partition by product order by yearly),0) >0 then 'Above Avg'
+        when total_sales - round(avg(total_sales) over(partition by product order by yearly),0) <0 then 'Below Avg'
+        else 'Avg'
+    end as avg_change
+from cte
+order by product,yearly
+;
