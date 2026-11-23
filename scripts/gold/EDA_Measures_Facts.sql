@@ -1,3 +1,6 @@
+--//-------------------------------
+--//Simple High Level Analysis
+--//-------------------------------
 
 -- High level view of sales data
 select 'Total $ Sales' as meausure_name, sum(sales_amount) as measure_value from gold.fact_sales
@@ -79,3 +82,36 @@ select
     top_ranks
 from cte
 where top_ranks <=10 or bot_ranks <=10
+
+
+--//-------------------------------
+--//More Advanced / Granular Analysis
+--//-------------------------------
+
+--running total sales per month per year
+select
+    monthly_date,
+    total_sales,
+    sum(total_sales) over(partition by date_trunc('year',monthly_date) order by monthly_date) as running_total
+from(
+--total sales by month per year
+    select date_trunc('month', order_date)::date as monthly_date,
+           sum(sales_amount)            as total_sales,
+    from gold.fact_sales
+    where order_date is not null
+    group by date_trunc('month', order_date)
+    order by date_trunc('month', order_date)
+) t
+;
+
+--total sales, customers, quantity by month per year
+select
+    date_trunc('month', order_date)::date,
+    sum(sales_amount) as total_sales,
+    count(distinct customer_key) as total_customers,
+    sum(quantity) as total_quantity
+from gold.fact_sales
+where order_date is not null
+group by date_trunc('month', order_date)
+order by date_trunc('month', order_date)
+;
