@@ -208,4 +208,5 @@ select
 from gold.fact_sales
 ) t
 group by customer_segment
+order by num_cust desc
 ;
