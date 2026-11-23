@@ -150,3 +150,22 @@ select
 from cte
 order by product,yearly
 ;
+
+--view the total sales and % of total sales for each category compared to the total sales overall
+select
+    category,
+    sum(category_sales) over() as grand_total,
+    category_sales,
+    round((category_sales::numeric / sum(category_sales) over())*100,2):: varchar||'%' as percent_of_total
+from
+(
+select
+    p.category as category,
+    sum(s.sales_amount) as category_sales
+from gold.fact_sales as s
+left join gold.dim_products as p on s.product_key = p.product_key
+group by p.category
+)t
+order by category_sales desc
+;
+
